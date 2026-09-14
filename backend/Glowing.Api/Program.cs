@@ -7,12 +7,14 @@ builder.Services.AddOpenApi();
 builder.Services.AddSingleton<TopicCatalog>();
 builder.Services.AddSingleton<LessonEvaluator>();
 builder.Services.AddSingleton<GamificationService>();
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+    ?? ["http://localhost:5173"];
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("frontend", policy => policy
+        .WithOrigins(allowedOrigins)
         .AllowAnyHeader()
-        .AllowAnyMethod()
-        .SetIsOriginAllowed(_ => true));
+        .AllowAnyMethod());
 });
 
 var app = builder.Build();

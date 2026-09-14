@@ -32,7 +32,7 @@ public sealed class GamificationService
     {
         var state = GetOrCreateState(request.UserId);
         var practicedAt = request.PracticedAt ?? DateTimeOffset.UtcNow;
-        var practiceDate = DateOnly.FromDateTime(practicedAt.LocalDateTime);
+        var practiceDate = DateOnly.FromDateTime(practicedAt.Date);
         var qualifiesStreak = request.SpokenSentenceCount >= 3 || request.TopicCompleted;
 
         lock (state.SyncRoot)
@@ -79,7 +79,7 @@ public sealed class GamificationService
                 state.Gold += 5;
             }
 
-            var localHour = practicedAt.LocalDateTime.Hour;
+            var localHour = practicedAt.Hour;
             if (localHour is >= 20 and < 21 && state.LastGoldenHourQuestDate != practiceDate)
             {
                 state.LastGoldenHourQuestDate = practiceDate;

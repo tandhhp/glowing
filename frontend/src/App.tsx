@@ -52,6 +52,7 @@ function App() {
   const [spokenSentenceCount, setSpokenSentenceCount] = useState(3)
   const [practiceMinutes, setPracticeMinutes] = useState(5)
   const [evaluation, setEvaluation] = useState<EvaluationResponse | null>(null)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
   const userId = 'student-demo'
@@ -73,6 +74,7 @@ function App() {
 
   async function submitLesson() {
     setLoading(true)
+    setErrorMessage(null)
     try {
       const response = await fetch('/api/lesson/evaluate', {
         method: 'POST',
@@ -87,6 +89,13 @@ function App() {
           practicedAt: new Date().toISOString(),
         }),
       })
+
+      if (!response.ok) {
+        const errorPayload = (await response.json()) as { message?: string }
+        setErrorMessage(errorPayload.message ?? 'Không thể chấm điểm. Vui lòng thử lại.')
+        setEvaluation(null)
+        return
+      }
 
       const payload = (await response.json()) as EvaluationResponse
       setEvaluation(payload)
@@ -134,16 +143,20 @@ function App() {
           <p className="mt-1 text-sm text-slate-600">
             Chủ đề đang luyện: <strong>{selectedTopicTitle}</strong>
           </p>
-          <label className="mt-3 block text-sm font-medium">Câu nói từ Mic (Whisper transcript)</label>
+          <label htmlFor="transcript" className="mt-3 block text-sm font-medium">
+            Câu nói từ Mic (Whisper transcript)
+          </label>
           <textarea
+            id="transcript"
             className="input mt-1 h-28"
             value={transcript}
             onChange={(event) => setTranscript(event.target.value)}
           />
           <div className="mt-3 grid grid-cols-2 gap-2">
-            <label className="text-sm">
+            <label htmlFor="spokenSentenceCount" className="text-sm">
               Số câu đã nói
               <input
+                id="spokenSentenceCount"
                 className="input mt-1"
                 type="number"
                 min={1}
@@ -151,9 +164,10 @@ function App() {
                 onChange={(event) => setSpokenSentenceCount(Number(event.target.value))}
               />
             </label>
-            <label className="text-sm">
+            <label htmlFor="practiceMinutes" className="text-sm">
               Số phút luyện
               <input
+                id="practiceMinutes"
                 className="input mt-1"
                 type="number"
                 min={1}
@@ -170,10 +184,13 @@ function App() {
               <p className="text-xl font-bold">Score: {evaluation.score}</p>
               <p className="mt-1 text-sm">{evaluation.pronunciationFeedback}</p>
               <p className="mt-1 text-sm">{evaluation.grammarFeedback}</p>
-              <p className="mt-1 text-sm font-medium">AI: “{evaluation.nextAiResponse}”</p>
+              <p className="mt-1 text-sm font-medium">
+                <span className="font-semibold">AI:</span> {evaluation.nextAiResponse}
+              </p>
               <p className="mt-1 text-sm text-emerald-700">+{evaluation.xpEarned} XP</p>
             </div>
           ) : null}
+          {errorMessage ? <p className="mt-3 text-sm text-red-600">{errorMessage}</p> : null}
         </div>
       </section>
 
