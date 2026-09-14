@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/backend/">
+    <Project Path="backend/Glowing.Api.Tests/Glowing.Api.Tests.csproj" />
+    <Project Path="backend/Glowing.Api/Glowing.Api.csproj" />
+  </Folder>
+</Solution>
